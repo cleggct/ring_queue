@@ -164,7 +164,7 @@ class RingQueue{
 
     // Mutators
     void push_back( const ItemType& value ){
-		back() = value; //put the new item at the end of the queue
+		buffer[end_index()] = value; //put the new item at the end of the queue
 		if (ring_size < MAX_SIZE) { //if the ring is not at full capacity
 			++ring_size; //update the size to reflect the ring's new size
 		}
