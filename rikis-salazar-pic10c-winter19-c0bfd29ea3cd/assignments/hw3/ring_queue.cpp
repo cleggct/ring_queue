@@ -57,27 +57,30 @@ class RingQueue{
       public:
         reference operator*() {
             // Replace the line(s) below with your code.
-            return parent->buffer[0] ;
+            return parent->buffer[(parent->begin_index + offset) % MAX_SIZE] ;
         }
 
         iterator& operator++(){
             // Replace the line(s) below with your code.
-            return *this;
+			++offset; //increment the offset to increment the iterator
+            return *this; //as this is the prefix increment operator, we should return the modified iterator
         }
 
         iterator operator++( int unused ){
             // Replace the line(s) below with your code.
-            return *this;
+			iterator copy(parent, offset); //make a copy of the iterator in its unmodified state
+			++(*this); //increment the iterator
+            return copy; //return the unmodified copy
         }
 
         bool operator==( const iterator& rhs ) const {
             // Replace the line(s) below with your code.
-            return true;
+            return (parent == rhs->parent) && (offset == rhs->offset); //the iterators are equal if they have the same parent and offset
         }
 
         bool operator!=( const iterator& rhs ) const {
             // Replace the line(s) below with your code.
-            return true;
+            return !(*this == rhs); //check if the iterators are not equal
         }
 
     }; // end of iterator class
@@ -127,7 +130,7 @@ class RingQueue{
     // A helper function that computes the index of 'the end' of the RingQueue
     int end_index() const {
         // Replace the line(s) below with your code.
-        return begin_index;
+        return (begin_index + ring_size) % MAX_SIZE; //get the end index by adding the size to the beginning and taking the remainder with the capacity
     }
 
 
@@ -144,7 +147,7 @@ class RingQueue{
 
 
         // Replace the line(s) below with your code.
-        return buffer[0];
+        return buffer[begin_index]; //return the oldest item
     }
 
     ItemType back() const {
@@ -154,17 +157,26 @@ class RingQueue{
 
 
         // Replace the line(s) below with your code.
-        return buffer[0];
+        return buffer[end_index()]; //return the newest item
     }
 
 
 
     // Mutators
     void push_back( const ItemType& value ){
+		back() = value; //put the new item at the end of the queue
+		if (ring_size < MAX_SIZE) { //if the ring is not at full capacity
+			++ring_size; //update the size to reflect the ring's new size
+		}
+		else { //if the ring is at full capacity
+			++begin_index; //we have just overwritten the beginning of the ring, so increment the begin_index
+		}
         return;
     }
 
     void pop_front(){
+		++begin_index; //incrementing the beginning index will serve the same purpose as removing the element
+		--ring_size; //update the size
         return;
     }
 
@@ -172,19 +184,19 @@ class RingQueue{
     // Functions that return iterators
     iterator begin() {
         // Replace the line(s) below with your code.
-        return iterator(this,0);
+        return iterator(this,0); //this will suffice as it will create an iterator for the ring at the beginning index
     }
 
     iterator end() {
         // Replace the line(s) below with your code.
-        return iterator(this,0);
+        return iterator(this,ring_size); //the offset of the end index from the beginning index is the size of the ring
     }
 
 
     // Miscellaneous functions
     size_t size() const {
         // Replace the line(s) below with your code.
-        return 0;
+        return ring_size; //return the size of the ring
     }
 
     // Debugging functions
